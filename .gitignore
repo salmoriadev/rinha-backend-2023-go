@@ -1,0 +1,17 @@
+# Go
+bin/
+*.exe
+*.test
+*.out
+coverage.out
+
+# Env
+.env
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Docker/Postgres local data
+postgres_data/
