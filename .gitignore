@@ -3,6 +3,7 @@ bin/
 *.exe
 *.test
 *.out
+api/rinha-backend-2023-go
 coverage.out
 
 # Env
