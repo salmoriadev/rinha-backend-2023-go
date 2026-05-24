@@ -132,5 +132,5 @@ func writeJSON(w http.ResponseWriter, status int, data any) {
 }
 
 func contextWithTimeout(r *http.Request) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(r.Context(), 3*time.Second)
+	return context.WithTimeout(r.Context(), 10*time.Second)
 }

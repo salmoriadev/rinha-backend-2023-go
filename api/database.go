@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"os"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func ConnectDatabase() (*pgxpool.Pool, error) {
@@ -13,21 +14,42 @@ func ConnectDatabase() (*pgxpool.Pool, error) {
 	if databaseURL == "" {
 		databaseURL = "postgres://rinha:rinha@localhost:5432/rinha?sslmode=disable"
 	}
-	var db *pgxpool.Pool
-	var err error
+
+	cfg, err := pgxpool.ParseConfig(databaseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg.MaxConns = 20
+	cfg.MinConns = 4
+	cfg.MaxConnIdleTime = 30 * time.Second
+
+	var lastErr error
+
 	for i := 1; i <= 20; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		db, err = pgxpool.New(ctx, databaseURL)
+
+		db, err := pgxpool.NewWithConfig(ctx, cfg)
 		if err == nil {
-			db.Ping(ctx)
+			err = db.Ping(ctx)
 		}
+
 		cancel()
+
 		if err == nil {
 			log.Println("Connected to database")
 			return db, nil
 		}
+
+		if db != nil {
+			db.Close()
+		}
+
+		lastErr = err
 		log.Printf("Trying to connect to database (attempt %d/20): %v", i, err)
+		time.Sleep(250 * time.Millisecond)
 	}
-	log.Fatalf("Failed to connect to database after 20 attempts")
-	return nil, err
+
+	log.Printf("Failed to connect to database after 20 attempts")
+	return nil, lastErr
 }

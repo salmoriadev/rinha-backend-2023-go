@@ -106,7 +106,7 @@ func (r *PessoaRepository) SearchPessoas(ctx context.Context, term string) ([]Pe
 			stack,
 			to_char(nascimento, 'YYYY-MM-DD')
 		FROM pessoas
-		WHERE busca ILIKE '%' || $1 || '%'
+		WHERE busca LIKE '%' || lower($1) || '%'
 		LIMIT 50
 		`,
 		term,
